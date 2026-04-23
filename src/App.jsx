@@ -1,5 +1,27 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Component } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ─────────────────────────────────────────────
+// ERROR BOUNDARY — กัน white screen จาก crash
+// ─────────────────────────────────────────────
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { crashed: false }; }
+  static getDerivedStateFromError() { return { crashed: true }; }
+  render() {
+    if (this.state.crashed) return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#1a1a2e', padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 52 }}>🗑️</div>
+        <div style={{ fontFamily: "'Bangers',cursive", fontSize: 28, color: '#fef3c7', marginTop: 16, letterSpacing: 2 }}>เกิดข้อผิดพลาด</div>
+        <button onClick={() => { this.setState({ crashed: false }); window.location.reload(); }}
+          style={{ marginTop: 20, fontFamily: "'Bangers',cursive", fontSize: 18, letterSpacing: 2, padding: '10px 28px', background: '#dc2626', color: '#fef3c7', border: '3px solid #fef3c7', borderRadius: 8, cursor: 'pointer' }}>
+          ลองใหม่
+        </button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
 
 // ─────────────────────────────────────────────
 // PARTICLE — outside component, stable ref
@@ -430,6 +452,7 @@ export default function App() {
   const canDispose = hasContent() && phase === 'idle';
 
   return (
+    <ErrorBoundary>
     <div style={{ width: '100%', maxWidth: 480, position: 'relative' }}>
       <canvas ref={particleCanvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 100 }} />
 
@@ -521,18 +544,22 @@ export default function App() {
                 position: 'relative', zIndex: 1, wordBreak: 'break-word',
                 display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
               }}>
-                {fadeChars.map(c => (
-                  <span key={c.id} style={{
-                    display: 'inline-block',
-                    whiteSpace: c.char === ' ' ? 'pre' : 'normal',
-                    opacity: c.vanish ? 0 : 1,
-                    filter: c.vanish ? 'blur(4px)' : 'blur(0)',
-                    transform: c.vanish ? `translate(${c.dx}px,${c.dy}px)` : 'translate(0,0)',
-                    transition: 'opacity 0.4s ease-out, filter 0.4s ease-out, transform 0.4s ease-out',
-                  }}>
-                    {c.char === '\n' ? <br /> : c.char}
-                  </span>
-                ))}
+                {fadeChars.map(c =>
+                  c.char === '\n'
+                    ? <span key={c.id} style={{ display: 'block', height: '1em' }} />
+                    : (
+                      <span key={c.id} style={{
+                        display: 'inline-block',
+                        whiteSpace: c.char === ' ' ? 'pre' : 'normal',
+                        opacity: c.vanish ? 0 : 1,
+                        filter: c.vanish ? 'blur(4px)' : 'blur(0)',
+                        transform: c.vanish ? `translate(${c.dx}px,${c.dy}px)` : 'translate(0,0)',
+                        transition: 'opacity 0.4s ease-out, filter 0.4s ease-out, transform 0.4s ease-out',
+                      }}>
+                        {c.char}
+                      </span>
+                    )
+                )}
               </div>
             </div>
           </motion.div>
@@ -657,6 +684,7 @@ export default function App() {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }
 
