@@ -1,0 +1,29 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: #fbbf24;
+  background-image: radial-gradient(circle, #f59e0b44 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  font-family: 'Comic Neue', cursive;
+}
+
+#root {
+  width: 100%;
+  max-width: 480px;
+}
+
+textarea {
+  font-family: 'Comic Neue', cursive;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 2px; }
