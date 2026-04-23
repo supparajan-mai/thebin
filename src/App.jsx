@@ -66,23 +66,59 @@ function useVoice({ onResult }) {
   const recRef = useRef(null);
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+
+  const reset = useCallback(() => {
+    // Recreate recognition instance so it can be restarted after error/end
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const r = new SR();
+    r.lang = 'th-TH'; r.continuous = true; r.interimResults = true;
+    r.onresult = e => onResult(Array.from(e.results).map(x => x[0].transcript).join(''));
+    r.onend = () => setListening(false);
+    r.onerror = (e) => {
+      setListening(false);
+      if (e.error === 'not-allowed' || e.error === 'permission-denied') {
+        setErrMsg('กรุณาอนุญาต Microphone ใน browser ก่อนนะ');
+      } else if (e.error === 'no-speech') {
+        setErrMsg('ไม่ได้ยินเสียง ลองพูดใหม่อีกครั้ง');
+      } else {
+        setErrMsg(`เกิดข้อผิดพลาด: ${e.error}`);
+      }
+      // Auto-clear error after 3s
+      setTimeout(() => setErrMsg(''), 3000);
+    };
+    recRef.current = r;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
     setSupported(true);
-    const r = new SR();
-    r.lang = 'th-TH'; r.continuous = true; r.interimResults = true;
-    r.onresult = e => onResult(Array.from(e.results).map(x => x[0].transcript).join(''));
-    r.onend = () => setListening(false);
-    recRef.current = r;
-    return () => r.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    reset();
+    return () => recRef.current?.abort();
+  }, [reset]);
+
+  const start = useCallback(() => {
+    setErrMsg('');
+    // Always recreate instance before starting to avoid InvalidStateError
+    reset();
+    try {
+      recRef.current?.start();
+      setListening(true);
+    } catch (e) {
+      setListening(false);
+      setErrMsg('ไม่สามารถเริ่มฟังได้ ลองอีกครั้ง');
+    }
+  }, [reset]);
+
+  const stop = useCallback(() => {
+    try { recRef.current?.stop(); } catch {}
+    setListening(false);
   }, []);
 
-  const start = useCallback(() => { recRef.current?.start(); setListening(true); }, []);
-  const stop  = useCallback(() => { recRef.current?.stop();  setListening(false); }, []);
-  return { listening, supported, start, stop };
+  return { listening, supported, start, stop, errMsg };
 }
 
 // ─────────────────────────────────────────────
@@ -409,7 +445,7 @@ export default function App() {
                   />
                 )}
                 {tab === 'voice' && (
-                  <VoiceTab voice={voice} voiceText={voiceText} onClear={() => setVoiceText('')} fx={fx} isShh={phase === 'animating' && fx === 'shh'} />
+                  <VoiceTab voice={voice} voiceText={voiceText} onClear={() => setVoiceText('')} />
                 )}
               </motion.div>
             ) : (
@@ -525,13 +561,24 @@ function VoiceTab({ voice, voiceText, onClear }) {
             style={{
               width: 80, height: 80, borderRadius: '50%', fontSize: 30,
               background: voice.listening ? '#16a34a' : '#dc2626',
-              border: '4px solid #1a1a2e', boxShadow: '4px 4px 0 #1a1a2e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '4px solid #1a1a2e', boxShadow: '4px 4px 0 #1a1a2e',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >{voice.listening ? '⏹' : '🎙'}</motion.button>
 
+          {/* Error message */}
+          <AnimatePresence>
+            {voice.errMsg && (
+              <motion.p
+                initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, textAlign: 'center', background: '#fef2f2', border: '2px solid #dc2626', borderRadius: 6, padding: '4px 12px' }}
+              >{voice.errMsg}</motion.p>
+            )}
+          </AnimatePresence>
+
           {voiceText
             ? <p style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e', textAlign: 'center', lineHeight: 1.6, maxHeight: 80, overflowY: 'auto' }}>{voiceText}</p>
-            : <p style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>{voice.listening ? 'กำลังฟัง…' : 'แตะไมค์เพื่อเริ่ม'}</p>
+            : !voice.errMsg && <p style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>{voice.listening ? 'กำลังฟัง…' : 'แตะไมค์เพื่อเริ่ม'}</p>
           }
           {voiceText && !voice.listening && (
             <button onClick={onClear} style={{ fontSize: 10, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: 2 }}>Clear</button>
