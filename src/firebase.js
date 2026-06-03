@@ -31,8 +31,7 @@ export function setupRecaptcha(containerId) {
     window.recaptchaVerifier.clear();
   }
   window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-    size: 'normal',
-    theme: 'light',
+    size: 'invisible',
     callback: () => {},
     'expired-callback': () => {
       window.recaptchaVerifier = null;
