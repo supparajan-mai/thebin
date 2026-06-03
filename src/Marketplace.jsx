@@ -211,7 +211,10 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
                   width: '100%', borderRadius: 8,
                   border: `2px solid ${item.color}`,
                   display: 'block',
-                  objectFit: 'cover', maxHeight: 280,
+                  objectFit: 'contain',
+maxHeight: 220,
+width: '100%',
+height: 'auto',
                 }}
                 onError={e => { e.target.style.display = 'none'; }}
               />
