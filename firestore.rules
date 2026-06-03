@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────
+    // users/{uid}
+    // อ่านได้เฉพาะเจ้าของ, เขียนได้เฉพาะ Cloud Function (admin SDK)
+    // ─────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // Cloud Function เท่านั้น (ใช้ admin SDK)
+    }
+
+    // ─────────────────────────────────────────
+    // orders/{chargeId}
+    // ลูกค้าสร้างได้เฉพาะ order ของตัวเอง (pending)
+    // อ่านได้เฉพาะเจ้าของ
+    // อัปเดตสถานะทำได้เฉพาะ Cloud Function
+    // ─────────────────────────────────────────
+    match /orders/{orderId} {
+      allow read: if request.auth != null
+                  && resource.data.uid == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      allow update: if false; // Cloud Function เท่านั้น
+    }
+  }
+}
