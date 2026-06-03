@@ -95,6 +95,7 @@ function useOmise() {
       frameLabel: 'THE BIN!',
       frameDescription: item.name,
       defaultPaymentMethod: 'promptpay',
+      otherPaymentMethods: ['credit_card'],
     });
 
     window.OmiseCard.open({
