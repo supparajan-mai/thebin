@@ -1,12 +1,11 @@
 import { useState } from 'react';
+import { useLang } from './i18n.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ─────────────────────────────────────────────
 // OMISE CONFIG
 // ─────────────────────────────────────────────
 const OMISE_PUBLIC_KEY = 'pkey_test_67vpfb3dkcivf7440ns';
-
-// Cloud Function URL — เปลี่ยนหลัง deploy
 const CLOUD_FN_URL = 'https://createcharge-yi76acbafa-uc.a.run.app';
 
 // ─────────────────────────────────────────────
@@ -65,7 +64,6 @@ export function isOwned(itemId, purchases) {
     const bundle = SHOP_ITEMS.find(i => i.id === 'bundle_all');
     if (bundle?.includes?.includes(itemId)) return true;
   }
-  // bundle_all เป็นเจ้าของถ้ามีทุก skin ครบ
   const allSkins = ['skin_chat', 'skin_email', 'skin_dart'];
   if (itemId === 'bundle_all' && allSkins.every(s => purchases.includes(s))) return true;
   return false;
@@ -76,7 +74,6 @@ export function isOwned(itemId, purchases) {
 // ─────────────────────────────────────────────
 function useOmise() {
   const [loaded, setLoaded] = useState(!!window.OmiseCard);
-
   if (!loaded && !window._omiseLoading) {
     window._omiseLoading = true;
     const s = document.createElement('script');
@@ -84,23 +81,20 @@ function useOmise() {
     s.onload = () => setLoaded(true);
     document.head.appendChild(s);
   }
-
   const openCheckout = ({ item, uid, onSuccess, onError }) => {
     if (!window.OmiseCard) { onError('ยังโหลด payment gateway ไม่เสร็จ'); return; }
-
     window.OmiseCard.configure({
       publicKey: OMISE_PUBLIC_KEY,
       currency: 'thb',
       frameLabel: 'THE BIN!',
       frameDescription: item.name,
       defaultPaymentMethod: 'promptpay',
+      otherPaymentMethods: ['credit_card'],
     });
-
     window.OmiseCard.open({
       amount: item.amountSatang,
       onCreateTokenSuccess: async (nonce) => {
         try {
-          // nonce อาจเป็น token (บัตร) หรือ source (PromptPay)
           const isSource = nonce && nonce.startsWith('src_');
           const res = await fetch(CLOUD_FN_URL, {
             method: 'POST',
@@ -123,24 +117,23 @@ function useOmise() {
       onFormClosed: () => {},
     });
   };
-
   return { loaded, openCheckout };
 }
 
 // ─────────────────────────────────────────────
 // SHOP CARD
 // ─────────────────────────────────────────────
-function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
+function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin, onOpenLegal }) {
+  const { t } = useLang();
   const [buying, setBuying] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [agreed, setAgreed] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const omise = useOmise();
   const owned = isOwned(item.id, purchases);
 
   const handleBuy = () => {
     if (!uid) { onNeedLogin(); return; }
-    if (!agreed) { setErrMsg('กรุณายอมรับเงื่อนไขการใช้งานก่อนครับ'); return; }
+    if (!agreed) { setErrMsg(t.terms_error); return; }
     setBuying(true);
     setErrMsg('');
     omise.openCheckout({
@@ -191,30 +184,18 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
 
         {/* Preview Image */}
         {item.preview && (
-          <div style={{ marginBottom: 10 }}>
-            <button onClick={() => setShowPreview(!showPreview)}
-              style={{
-                width: '100%', fontSize: 11, fontWeight: 700,
-                color: item.color, background: 'none',
-                border: `1.5px dashed ${item.color}`,
-                borderRadius: 6, padding: '5px 10px',
-                cursor: 'pointer', letterSpacing: 1,
-                marginBottom: showPreview ? 8 : 0,
-              }}>
-              {showPreview ? '▲ ซ่อนตัวอย่าง' : '▼ ดูตัวอย่าง'}
-            </button>
-            {showPreview && (
-              <img src={item.preview} alt={item.name}
-                style={{
-                  width: '100%', borderRadius: 8,
-                  border: `2px solid ${item.color}`,
-                  display: 'block',
-                  objectFit: 'cover', maxHeight: 280,
-                }}
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-            )}
-          </div>
+          <img src={item.preview} alt={item.name}
+            style={{
+              width: '100%', borderRadius: 8,
+              border: `2px solid ${item.color}`,
+              display: 'block',
+              objectFit: 'contain',
+              maxHeight: 220,
+              height: 'auto',
+              marginBottom: 10,
+            }}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
@@ -242,14 +223,14 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
               style={{ marginTop: 2, width: 14, height: 14, accentColor: item.color, cursor: 'pointer', flexShrink: 0 }}
             />
             <span style={{ fontSize: 10, color: '#374151', lineHeight: 1.5 }}>
-              ฉันได้อ่านและยอมรับ{' '}
-              <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+              {t.terms_agree_prefix}{' '}
+              <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenLegal?.('terms'); }}
                 style={{ color: item.color, fontWeight: 700, textDecoration: 'underline' }}
-              >เงื่อนไขการใช้งาน</a>
-              {' '}และ{' '}
-              <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+              >{t.terms_agree_terms}</a>
+              {' '}{t.terms_agree_and}{' '}
+              <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenLegal?.('privacy'); }}
                 style={{ color: item.color, fontWeight: 700, textDecoration: 'underline' }}
-              >นโยบายคืนเงิน</a>
+              >{t.terms_agree_refund}</a>
             </span>
           </label>
         )}
@@ -262,8 +243,8 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
             <div style={{ fontFamily: "'Bangers',cursive", fontSize: 26, color: '#1a1a2e', letterSpacing: 1, lineHeight: 1 }}>฿{item.price}</div>
           </div>
           <motion.button
-            whileHover={!owned ? { x: -2, y: -2 } : {}}
-            whileTap={!owned ? { x: 1, y: 1 } : {}}
+            whileHover={!owned && agreed ? { x: -2, y: -2 } : {}}
+            whileTap={!owned && agreed ? { x: 1, y: 1 } : {}}
             onClick={handleBuy}
             disabled={owned || buying || (!owned && !agreed)}
             style={{
@@ -277,7 +258,7 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
               transition: 'all .1s',
             }}
           >
-            {buying ? '⏳…' : owned ? 'ใช้งานแล้ว' : !uid ? '🔑 Login ก่อน' : 'ซื้อเลย!'}
+            {buying ? '⏳…' : owned ? t.owned_btn : !uid ? t.login_first : t.buy_btn}
           </motion.button>
         </div>
       </div>
@@ -289,6 +270,7 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin }) {
 // SUCCESS MODAL
 // ─────────────────────────────────────────────
 function SuccessModal({ item, onClose }) {
+  const { t } = useLang();
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -303,12 +285,12 @@ function SuccessModal({ item, onClose }) {
         <div style={{ fontSize: 56, marginBottom: 8 }}>{item.emoji}</div>
         <div style={{ fontFamily: "'Bangers',cursive", fontSize: 28, color: '#dc2626', letterSpacing: 3, textShadow: '3px 3px 0 #7f1d1d' }}>สำเร็จ!!</div>
         <div style={{ fontFamily: "'Bangers',cursive", fontSize: 20, color: '#1a1a2e', letterSpacing: 2, margin: '6px 0 4px' }}>{item.name}</div>
-        <p style={{ fontSize: 12, color: '#374151', marginBottom: 20 }}>ปลดล็อกสำเร็จ! ซิงค์ข้ามเครื่องได้แล้ว 🎉</p>
+        <p style={{ fontSize: 12, color: '#374151', marginBottom: 20 }}>{t.success_msg}</p>
         <motion.button
           whileHover={{ x: -2, y: -2 }} whileTap={{ x: 1, y: 1 }}
           onClick={onClose}
           style={{ fontFamily: "'Bangers',cursive", fontSize: 18, letterSpacing: 2, padding: '10px 28px', background: '#dc2626', color: '#fef3c7', border: '3px solid #1a1a2e', borderRadius: 8, cursor: 'pointer', boxShadow: '4px 4px 0 #1a1a2e' }}
-        >ไปใช้งาน!</motion.button>
+        >{t.success_btn}</motion.button>
       </motion.div>
     </motion.div>
   );
@@ -317,11 +299,12 @@ function SuccessModal({ item, onClose }) {
 // ─────────────────────────────────────────────
 // MARKETPLACE MAIN
 // ─────────────────────────────────────────────
-export default function Marketplace({ user, purchases, onRefreshPurchases, onNeedLogin }) {
+export default function Marketplace({ user, purchases, onRefreshPurchases, onNeedLogin, onOpenLegal }) {
+  const { t } = useLang();
   const [successItem, setSuccessItem] = useState(null);
 
   const handleBuySuccess = async (item) => {
-    await onRefreshPurchases(); // ดึง purchases ใหม่จาก Firestore
+    await onRefreshPurchases();
     setSuccessItem(item);
   };
 
@@ -330,8 +313,8 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
       {/* Header */}
       <div style={{ background: '#1d4ed8', borderBottom: '4px solid #1a1a2e', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: '#fef3c7', letterSpacing: 2, textShadow: '2px 2px 0 #1e3a8a' }}>🛍 BIN SHOP</div>
-          <div style={{ fontSize: 9, color: '#93c5fd', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>สกินและเอฟเฟคพิเศษ</div>
+          <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: '#fef3c7', letterSpacing: 2, textShadow: '2px 2px 0 #1e3a8a' }}>{t.shop_title}</div>
+          <div style={{ fontSize: 9, color: '#93c5fd', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>{t.shop_subtitle}</div>
         </div>
         {user ? (
           <div style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '3px 10px', fontFamily: "'Bangers',cursive", fontSize: 10, color: '#1a1a2e', letterSpacing: 1, boxShadow: '2px 2px 0 #1a1a2e', textAlign: 'right' }}>
@@ -341,7 +324,7 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
         ) : (
           <button onClick={onNeedLogin}
             style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '5px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 11, color: '#dc2626', letterSpacing: 1, boxShadow: '2px 2px 0 #1a1a2e' }}
-          >🔑 Login</button>
+          >{t.shop_login_btn}</button>
         )}
       </div>
 
@@ -349,7 +332,7 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
       {!user && (
         <div style={{ margin: '10px 12px 0', padding: '8px 12px', background: '#fffbeb', border: '2px dashed #f59e0b', borderRadius: 6, fontSize: 11, color: '#92400e', fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center' }}>
           <span>💡</span>
-          <span>Login ด้วยเบอร์โทรเพื่อซื้อสกิน และซิงค์ข้ามเครื่องได้ทุกที่</span>
+          <span>{t.shop_login_banner}</span>
         </div>
       )}
 
@@ -363,6 +346,7 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
               uid={user?.uid}
               onBuySuccess={handleBuySuccess}
               onNeedLogin={onNeedLogin}
+              onOpenLegal={onOpenLegal}
             />
           </motion.div>
         ))}
@@ -371,50 +355,26 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
       {/* Payment note */}
       <div style={{ margin: '14px 12px 0', padding: '8px 12px', background: '#f0fdf4', border: '2px dashed #16a34a', borderRadius: 6, fontSize: 10, color: '#15803d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>🔒</span>
-        <span>ชำระผ่าน Omise — รองรับบัตรเครดิต / PromptPay — สกินซิงค์อัตโนมัติทุกเครื่อง</span>
+        <span>{t.shop_payment_note}</span>
       </div>
 
       {/* ─── ABOUT SECTION ─── */}
-      <div style={{
-        margin: '16px 12px 0',
-        border: '3px solid #1a1a2e',
-        borderRadius: 10,
-        overflow: 'hidden',
-        boxShadow: '4px 4px 0 #1a1a2e',
-      }}>
-        {/* Header */}
-        <div style={{
-          background: '#fce7f3', borderBottom: '3px solid #1a1a2e',
-          padding: '12px 14px',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
+      <div style={{ margin: '16px 12px 0', border: '3px solid #1a1a2e', borderRadius: 10, overflow: 'hidden', boxShadow: '4px 4px 0 #1a1a2e' }}>
+        <div style={{ background: '#fce7f3', borderBottom: '3px solid #1a1a2e', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
           <img src="/skins/logo.png" alt="ตั้งใจคราฟท์"
             style={{ width: 52, height: 52, borderRadius: '50%', border: '2px solid #1a1a2e', objectFit: 'cover' }}
           />
           <div>
-            <div style={{ fontFamily: "'Bangers',cursive", fontSize: 18, color: '#be185d', letterSpacing: 2, lineHeight: 1 }}>
-              ตั้งใจคราฟท์ Collection
-            </div>
-            <div style={{ fontSize: 10, color: '#9d174d', fontWeight: 700, letterSpacing: 1, marginTop: 2 }}>
-              ผู้พัฒนา The Bin
-            </div>
+            <div style={{ fontFamily: "'Bangers',cursive", fontSize: 18, color: '#be185d', letterSpacing: 2, lineHeight: 1 }}>ตั้งใจคราฟท์ Collection</div>
+            <div style={{ fontSize: 10, color: '#9d174d', fontWeight: 700, letterSpacing: 1, marginTop: 2 }}>ผู้พัฒนา The Bin</div>
           </div>
         </div>
-
-        {/* Body */}
         <div style={{ background: '#fff', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <p style={{ fontSize: 12, color: '#374151', lineHeight: 1.7, margin: 0 }}>
-            The Bin สร้างขึ้นด้วยความตั้งใจให้เป็นพื้นที่ปลอดภัยสำหรับการระบายอารมณ์
-            ทุก pixel ทำด้วยใจ 🩷
+            The Bin สร้างขึ้นด้วยความตั้งใจให้เป็นพื้นที่ปลอดภัยสำหรับการระบายอารมณ์ ทุก pixel ทำด้วยใจ 🩷
           </p>
-
-          {/* Line */}
           <a href="https://line.me/R/ti/p/@tangjaicraft" target="_blank" rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              background: '#dcfce7', border: '2px solid #16a34a',
-              borderRadius: 8, padding: '8px 12px', textDecoration: 'none',
-            }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#dcfce7', border: '2px solid #16a34a', borderRadius: 8, padding: '8px 12px', textDecoration: 'none' }}>
             <span style={{ fontSize: 20 }}>💬</span>
             <div>
               <div style={{ fontWeight: 700, fontSize: 12, color: '#15803d' }}>ติดต่อ / ส่ง feedback</div>
@@ -422,14 +382,8 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
             </div>
             <span style={{ marginLeft: 'auto', fontSize: 11, color: '#16a34a', fontWeight: 700 }}>→</span>
           </a>
-
-          {/* Ko-fi */}
           <a href="https://ko-fi.com/tangjaicraftcollection" target="_blank" rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              background: '#fff7ed', border: '2px solid #f59e0b',
-              borderRadius: 8, padding: '8px 12px', textDecoration: 'none',
-            }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff7ed', border: '2px solid #f59e0b', borderRadius: 8, padding: '8px 12px', textDecoration: 'none' }}>
             <span style={{ fontSize: 20 }}>☕</span>
             <div>
               <div style={{ fontWeight: 700, fontSize: 12, color: '#92400e' }}>ซื้อกาแฟให้ทีมงาน</div>
@@ -437,7 +391,6 @@ export default function Marketplace({ user, purchases, onRefreshPurchases, onNee
             </div>
             <span style={{ marginLeft: 'auto', fontSize: 11, color: '#b45309', fontWeight: 700 }}>→</span>
           </a>
-
           <div style={{ fontSize: 9, color: '#9ca3af', textAlign: 'center', paddingTop: 4 }}>
             ผู้ donate จะได้รับสิทธิพิเศษในอนาคต 🎁
           </div>
