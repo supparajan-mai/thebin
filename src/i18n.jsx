@@ -79,6 +79,13 @@ export const TRANSLATIONS = {
     auth_privacy: 'เบอร์โทรใช้เพื่อยืนยันตัวตนเท่านั้น\nไม่เก็บข้อความ ไม่ส่งโฆษณา ไม่แชร์ข้อมูล',
     auth_phone_placeholder: '0812345678',
 
+    // Terms checkbox
+    terms_agree_prefix: 'ฉันได้อ่านและยอมรับ',
+    terms_agree_terms: 'เงื่อนไขการใช้งาน',
+    terms_agree_and: 'และ',
+    terms_agree_refund: 'นโยบายคืนเงิน',
+    terms_error: 'กรุณายอมรับเงื่อนไขการใช้งานก่อนครับ',
+
     // Locked overlay
     locked_shop_btn: '🛍 ซื้อ',
     locked_back: '← กลับ',
@@ -158,6 +165,13 @@ export const TRANSLATIONS = {
     auth_resend_wait: 'Resend in',
     auth_privacy: 'Your number is used for verification only.\nNo messages, no ads, no data sharing.',
     auth_phone_placeholder: '+66812345678',
+
+    // Terms checkbox
+    terms_agree_prefix: 'I have read and agree to the',
+    terms_agree_terms: 'Terms of Service',
+    terms_agree_and: 'and',
+    terms_agree_refund: 'Refund Policy',
+    terms_error: 'Please accept the terms before purchasing.',
 
     // Locked overlay
     locked_shop_btn: '🛍 Buy',
