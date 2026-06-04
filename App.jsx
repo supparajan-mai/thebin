@@ -447,6 +447,7 @@ function AppInner() {
   }
 
   return (
+    <>
     <ErrorBoundary>
     <div style={{ width: '100%', maxWidth: 480, position: 'relative' }}>
       <canvas ref={particleCanvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 100 }} />
@@ -692,11 +693,12 @@ function AppInner() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {legalPage && <LegalPage page={legalPage} onClose={() => setLegalPage(null)} />}
-      </AnimatePresence>
     </div>
     </ErrorBoundary>
+    <AnimatePresence>
+      {legalPage && <LegalPage page={legalPage} onClose={() => setLegalPage(null)} />}
+    </AnimatePresence>
+    </>
   );
 }
 
