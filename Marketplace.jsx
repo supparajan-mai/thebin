@@ -223,15 +223,16 @@ function ShopCard({ item, purchases, uid, onBuySuccess, onNeedLogin, onOpenLegal
               style={{ marginTop: 2, width: 14, height: 14, accentColor: item.color, cursor: 'pointer', flexShrink: 0 }}
             />
             <span style={{ fontSize: 10, color: '#374151', lineHeight: 1.5 }}>
-              {t.terms_agree_prefix}{' '}
-              <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenLegal?.('terms'); }}
-                style={{ color: item.color, fontWeight: 700, textDecoration: 'underline' }}
-              >{t.terms_agree_terms}</a>
-              {' '}{t.terms_agree_and}{' '}
-              <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenLegal?.('privacy'); }}
-                style={{ color: item.color, fontWeight: 700, textDecoration: 'underline' }}
-              >{t.terms_agree_refund}</a>
-            </span>
+  {t.terms_agree_prefix}{' '}
+  <span style={{ color: item.color, fontWeight: 700 }}>
+    {t.terms_agree_terms}
+  </span>
+  {' '}{t.terms_agree_and}{' '}
+  <span style={{ color: item.color, fontWeight: 700 }}>
+    {t.terms_agree_refund}
+  </span>
+  {' '}ด้านล่างของหน้านี้
+</span>
           </label>
         )}
 
