@@ -42,6 +42,17 @@ export const TRANSLATIONS = {
     footer_book: '📖 Paperback บน Amazon',
     footer_terms: 'Terms',
     footer_privacy: 'Privacy',
+    footer_refund: 'Refund',
+    footer_contact: 'Contact',
+
+    // Checkout compliance
+    compliance_text: 'การซื้อนี้เป็นการซื้อดิจิทัลคอนเทนต์ ซึ่งอาจไม่สามารถขอคืนเงินได้หลังจากปลดล็อกเรียบร้อยแล้ว กรุณาอ่านเงื่อนไขการใช้งานและนโยบายการคืนเงินก่อนชำระเงิน',
+
+    // About / business transparency
+    about_title: 'The Bin คืออะไร?',
+    about_body: 'The Bin คือโปรเจกต์ดิจิทัลเพื่อสุขภาวะส่วนตัว ที่ให้คุณปลดปล่อยความคิด อารมณ์ และความอัดอั้นได้อย่างปลอดภัยผ่านประสบการณ์ดิจิทัลแบบอินเทอร์แอกทีฟ',
+    about_premium: 'การซื้อแบบพรีเมียมจะปลดล็อกสกินและเอฟเฟกต์พิเศษเพิ่มเติม (เช่น Chat, Email และ Dart)',
+    about_support: 'ต้องการความช่วยเหลือ? ติดต่อเราผ่าน LINE Official @tangjaicraft',
 
     // Error
     crashed_title: 'เกิดข้อผิดพลาด',
@@ -129,6 +140,17 @@ export const TRANSLATIONS = {
     footer_book: '📖 Paperback on Amazon',
     footer_terms: 'Terms',
     footer_privacy: 'Privacy',
+    footer_refund: 'Refund',
+    footer_contact: 'Contact',
+
+    // Checkout compliance
+    compliance_text: 'This purchase is for digital content, which may not be refundable after it has been successfully delivered/unlocked. Please review our Terms of Service and Refund Policy before paying.',
+
+    // About / business transparency
+    about_title: 'What is The Bin?',
+    about_body: 'The Bin is a private digital wellness project that lets you safely release thoughts, emotions, and frustrations through interactive digital experiences.',
+    about_premium: 'Premium purchases unlock additional skins and special effects (such as Chat, Email, and Dart).',
+    about_support: 'Need help? Contact us via LINE Official @tangjaicraft.',
 
     // Error
     crashed_title: 'Something went wrong',

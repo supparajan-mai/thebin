@@ -8,9 +8,6 @@ import { AuthModal, useAuth } from './Auth.jsx';
 import { LangProvider, LangToggle, useLang } from './i18n.jsx';
 import LegalPage from './LegalPage.jsx';
 
-// ─────────────────────────────────────────────
-// ERROR BOUNDARY
-// ─────────────────────────────────────────────
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { crashed: false }; }
   static getDerivedStateFromError() { return { crashed: true }; }
@@ -29,9 +26,6 @@ class ErrorBoundary extends Component {
   }
 }
 
-// ─────────────────────────────────────────────
-// PARTICLE
-// ─────────────────────────────────────────────
 class Particle {
   constructor(x, y, opts = {}) {
     this.x = x; this.y = y;
@@ -59,9 +53,6 @@ class Particle {
   }
 }
 
-// ─────────────────────────────────────────────
-// LOCALSTORAGE
-// ─────────────────────────────────────────────
 const STORAGE_KEY = 'thebin_v1';
 function loadMeta() {
   try {
@@ -79,9 +70,6 @@ function calcStreak(lastDate, current) {
   return 1;
 }
 
-// ─────────────────────────────────────────────
-// VOICE HOOK
-// ─────────────────────────────────────────────
 function useVoice({ onResult }) {
   const recRef = useRef(null);
   const [listening, setListening] = useState(false);
@@ -122,9 +110,6 @@ function useVoice({ onResult }) {
   return { listening, supported, start, stop, errMsg };
 }
 
-// ─────────────────────────────────────────────
-// EFFECTS CONFIG
-// ─────────────────────────────────────────────
 const EFFECTS = [
   { id: 'bin',   label: '🗑 BIN',   free: true,  desc: 'กระดาษบิน → ตกถัง → ปุ้ง!!' },
   { id: 'boom',  label: '💥 BOOM',  free: true,  desc: 'กระดาษ + TNT → BOOOOOM!!!' },
@@ -134,9 +119,6 @@ const EFFECTS = [
   { id: 'flush', label: '🚽 FLUSH', free: false, desc: 'ชักโครก — Phase 2' },
 ];
 
-// ─────────────────────────────────────────────
-// BIN SVG
-// ─────────────────────────────────────────────
 function BinSVG({ lidRot, lidY, scaleX, scaleY, style }) {
   return (
     <svg viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg"
@@ -154,9 +136,6 @@ function BinSVG({ lidRot, lidY, scaleX, scaleY, style }) {
   );
 }
 
-// ─────────────────────────────────────────────
-// ONOMATOPOEIA
-// ─────────────────────────────────────────────
 function Onomat({ word, color, show }) {
   return (
     <AnimatePresence>
@@ -178,9 +157,6 @@ function Onomat({ word, color, show }) {
   );
 }
 
-// ─────────────────────────────────────────────
-// LOCKED SKIN PROMPT
-// ─────────────────────────────────────────────
 function LockedOverlay({ item, onGoShop }) {
   return (
     <motion.div
@@ -194,12 +170,8 @@ function LockedOverlay({ item, onGoShop }) {
       }}
     >
       <div style={{ fontSize: 48 }}>🔒</div>
-      <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: '#fef3c7', letterSpacing: 3, textAlign: 'center' }}>
-        {item?.name}
-      </div>
-      <div style={{ fontSize: 11, color: '#93c5fd', textAlign: 'center', lineHeight: 1.6 }}>
-        {item?.desc}
-      </div>
+      <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: '#fef3c7', letterSpacing: 3, textAlign: 'center' }}>{item?.name}</div>
+      <div style={{ fontSize: 11, color: '#93c5fd', textAlign: 'center', lineHeight: 1.6 }}>{item?.desc}</div>
       <motion.button
         whileHover={{ x: -2, y: -2 }} whileTap={{ x: 1, y: 1 }}
         onClick={onGoShop}
@@ -210,16 +182,11 @@ function LockedOverlay({ item, onGoShop }) {
           border: '3px solid #fef3c7', borderRadius: 8,
           cursor: 'pointer', boxShadow: '4px 4px 0 #7f1d1d',
         }}
-      >
-        🛍 ซื้อ ฿{item?.price}
-      </motion.button>
+      >🛍 ซื้อ ฿{item?.price}</motion.button>
     </motion.div>
   );
 }
 
-// ─────────────────────────────────────────────
-// MAIN APP
-// ─────────────────────────────────────────────
 function AppInner() {
   const [meta, setMeta]         = useState(loadMeta);
   const { user, purchases, authLoading, logout, refreshPurchases } = useAuth();
@@ -239,9 +206,7 @@ function AppInner() {
     visible: false,
     paperX: 0, paperY: 0, paperScale: 1, paperRot: 0, paperShow: false,
     tntX: 0, tntY: 0, tntRot: 0, tntShow: false,
-    lidRot: 0, lidY: 0,
-    binScaleX: 1, binScaleY: 1,
-    smokeList: [],
+    lidRot: 0, lidY: 0, binScaleX: 1, binScaleY: 1, smokeList: [],
   });
 
   const particleCanvasRef = useRef(null);
@@ -250,11 +215,9 @@ function AppInner() {
   const animFrameRef      = useRef(null);
   const isDrawing         = useRef(false);
   const hasDrawn          = useRef(false);
-
   const voice = useVoice({ onResult: setVoiceText });
 
   useEffect(() => { saveMeta(meta); }, [meta]);
-
   useEffect(() => {
     const resize = () => {
       if (!particleCanvasRef.current) return;
@@ -266,7 +229,6 @@ function AppInner() {
     resize();
     return () => ro.disconnect();
   }, []);
-
   useEffect(() => {
     if (tab !== 'draw' || !drawCanvasRef.current) return;
     const el = drawCanvasRef.current;
@@ -306,7 +268,6 @@ function AppInner() {
     if (tab === 'draw')  return hasDrawn.current;
     return false;
   };
-
   const clearContent = () => {
     setText(''); setVoiceText('');
     hasDrawn.current = false;
@@ -315,27 +276,20 @@ function AppInner() {
       ctx.clearRect(0, 0, drawCanvasRef.current.width, drawCanvasRef.current.height);
     }
   };
-
   const showOnomat = (word, color) => {
     setOnomat({ word, color, show: true });
     setTimeout(() => setOnomat(o => ({ ...o, show: false })), 900);
   };
-
-  // ─── PLAY SOUND ───
   const playSound = (filename, duration = null) => {
     try {
       const audio = new Audio(`/sounds/${filename}`);
       audio.volume = 0.7;
       audio.play().catch(() => {});
       if (duration) {
-        setTimeout(() => {
-          audio.pause();
-          audio.currentTime = 0;
-        }, duration * 1000);
+        setTimeout(() => { audio.pause(); audio.currentTime = 0; }, duration * 1000);
       }
     } catch {}
   };
-
   const afterEffect = (delay = 200) => {
     setTimeout(() => {
       clearContent();
@@ -350,17 +304,12 @@ function AppInner() {
       setTimeout(() => { setPhase('idle'); setPlaceholder('ระบายมันออกมาเลย เพื่อนเอ๋ย…'); }, 2000);
     }, delay);
   };
-
   const animBezier = (sx, sy, cpx, cpy, tx, ty, dur, onP, onD) => {
     const t0 = performance.now();
     const tick = (now) => {
       const t = Math.min((now - t0) / dur, 1);
       const e = t < .5 ? 2*t*t : -1+(4-2*t)*t;
-      onP(
-        (1-e)*(1-e)*sx + 2*(1-e)*e*cpx + e*e*tx,
-        (1-e)*(1-e)*sy + 2*(1-e)*e*cpy + e*e*ty,
-        e
-      );
+      onP((1-e)*(1-e)*sx + 2*(1-e)*e*cpx + e*e*tx, (1-e)*(1-e)*sy + 2*(1-e)*e*cpy + e*e*ty, e);
       if (t < 1) requestAnimationFrame(tick); else onD();
     };
     requestAnimationFrame(tick);
@@ -388,7 +337,6 @@ function AppInner() {
       }
     );
   };
-
   const runBoom = () => {
     playSound('boom explosion.mp3');
     const W = window.innerWidth, H = window.innerHeight;
@@ -414,10 +362,7 @@ function AppInner() {
                 setBinState(s => ({ ...s, lidRot: -65, lidY: -24, binScaleX: 1.09, binScaleY: 0.85 }));
                 setTimeout(() => setBinState(s => ({ ...s, binScaleX: 0.94, binScaleY: 1.07 })), 130);
                 setTimeout(() => setBinState(s => ({ ...s, binScaleX: 1, binScaleY: 1 })), 260);
-                setBinState(s => ({
-                  ...s,
-                  smokeList: Array.from({ length: 8 }, (_, i) => ({ id: i, angle: -110 + i * 28 + Math.random() * 16, dist: 45 + Math.random() * 55, size: 22 + Math.random() * 26, cx: binCX, cy: binCY })),
-                }));
+                setBinState(s => ({ ...s, smokeList: Array.from({ length: 8 }, (_, i) => ({ id: i, angle: -110 + i * 28 + Math.random() * 16, dist: 45 + Math.random() * 55, size: 22 + Math.random() * 26, cx: binCX, cy: binCY })) }));
                 showOnomat('BOOOOOM!!!', '#dc2626');
                 setTimeout(() => setBinState(s => ({ ...s, lidRot: -8, lidY: -3 })), 900);
                 setTimeout(() => setBinState(s => ({ ...s, lidRot: 0, lidY: 0, smokeList: [] })), 1450);
@@ -429,7 +374,6 @@ function AppInner() {
       }
     );
   };
-
   const runFade = () => {
     playSound('rain sound.mp3', 5);
     const content = tab === 'type' ? text : tab === 'voice' ? voiceText : null;
@@ -444,13 +388,11 @@ function AppInner() {
     });
     afterEffect(400 + totalDur + 600);
   };
-
   const runShh = () => {
     playSound('paper rip.mp3');
     showOnomat('RIP 🔇', '#6b7280');
     afterEffect(1500);
   };
-
   const dispose = () => {
     if (!hasContent() || phase !== 'idle') return;
     setPhase('animating');
@@ -467,7 +409,6 @@ function AppInner() {
   const dailyDone  = meta.lastDaily === todayStr();
   const canDispose = hasContent() && phase === 'idle';
 
-  // ── SKIN NAVIGATION ──
   if (mainTab === 'chat') {
     const item = SHOP_ITEMS.find(i => i.id === 'skin_chat');
     const own = isOwned('skin_chat', purchases);
@@ -475,16 +416,11 @@ function AppInner() {
       <ErrorBoundary>
         <div style={{ width: '100%', maxWidth: 480, height: '100dvh', display: 'flex', flexDirection: 'column', border: '5px solid #1a1a2e', borderRadius: 14, overflow: 'hidden', boxShadow: '8px 8px 0 #1a1a2e', position: 'relative' }}>
           {own ? <ChatSkin onBack={() => setMainTab('bin')} /> : <LockedOverlay item={item} onGoShop={() => setMainTab('shop')} />}
-          {!own && (
-            <div style={{ position: 'absolute', top: 14, left: 14 }}>
-              <button onClick={() => setMainTab('bin')} style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 12, letterSpacing: 1 }}>← กลับ</button>
-            </div>
-          )}
+          {!own && (<div style={{ position: 'absolute', top: 14, left: 14 }}><button onClick={() => setMainTab('bin')} style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 12, letterSpacing: 1 }}>← กลับ</button></div>)}
         </div>
       </ErrorBoundary>
     );
   }
-
   if (mainTab === 'email') {
     const item = SHOP_ITEMS.find(i => i.id === 'skin_email');
     const own = isOwned('skin_email', purchases);
@@ -492,16 +428,11 @@ function AppInner() {
       <ErrorBoundary>
         <div style={{ width: '100%', maxWidth: 480, height: '100dvh', display: 'flex', flexDirection: 'column', border: '5px solid #1a1a2e', borderRadius: 14, overflow: 'hidden', boxShadow: '8px 8px 0 #1a1a2e', position: 'relative' }}>
           {own ? <EmailSkin onBack={() => setMainTab('bin')} /> : <LockedOverlay item={item} onGoShop={() => setMainTab('shop')} />}
-          {!own && (
-            <div style={{ position: 'absolute', top: 14, left: 14 }}>
-              <button onClick={() => setMainTab('bin')} style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 12, letterSpacing: 1 }}>← กลับ</button>
-            </div>
-          )}
+          {!own && (<div style={{ position: 'absolute', top: 14, left: 14 }}><button onClick={() => setMainTab('bin')} style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 12, letterSpacing: 1 }}>← กลับ</button></div>)}
         </div>
       </ErrorBoundary>
     );
   }
-
   if (mainTab === 'dart') {
     const item = SHOP_ITEMS.find(i => i.id === 'skin_dart');
     const own = isOwned('skin_dart', purchases);
@@ -509,17 +440,14 @@ function AppInner() {
       <ErrorBoundary>
         <div style={{ width: '100%', maxWidth: 480, height: '100dvh', display: 'flex', flexDirection: 'column', border: '5px solid #1a1a2e', borderRadius: 14, overflow: 'hidden', boxShadow: '8px 8px 0 #1a1a2e', position: 'relative' }}>
           {own ? <DartSkin onBack={() => setMainTab('bin')} /> : <LockedOverlay item={item} onGoShop={() => setMainTab('shop')} />}
-          {!own && (
-            <div style={{ position: 'absolute', top: 14, left: 14 }}>
-              <button onClick={() => setMainTab('bin')} style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 12, letterSpacing: 1 }}>← กลับ</button>
-            </div>
-          )}
+          {!own && (<div style={{ position: 'absolute', top: 14, left: 14 }}><button onClick={() => setMainTab('bin')} style={{ background: '#fef3c7', border: '2px solid #1a1a2e', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: "'Bangers',cursive", fontSize: 12, letterSpacing: 1 }}>← กลับ</button></div>)}
         </div>
       </ErrorBoundary>
     );
   }
 
   return (
+    <>
     <ErrorBoundary>
     <div style={{ width: '100%', maxWidth: 480, position: 'relative' }}>
       <canvas ref={particleCanvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 100 }} />
@@ -527,7 +455,6 @@ function AppInner() {
         <Onomat word={onomat.word} color={onomat.color} show={onomat.show} />
       </div>
 
-      {/* BIN/BOOM OVERLAY */}
       <AnimatePresence>
         {binState.visible && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -571,7 +498,6 @@ function AppInner() {
         )}
       </AnimatePresence>
 
-      {/* FADE CHARS OVERLAY */}
       <AnimatePresence>
         {fadeChars.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -582,11 +508,7 @@ function AppInner() {
                 {fadeChars.map(c =>
                   c.char === '\n'
                     ? <span key={c.id} style={{ display: 'block', height: '1em' }} />
-                    : (
-                      <span key={c.id} style={{ display: 'inline-block', whiteSpace: c.char === ' ' ? 'pre' : 'normal', opacity: c.vanish ? 0 : 1, filter: c.vanish ? 'blur(4px)' : 'blur(0)', transform: c.vanish ? `translate(${c.dx}px,${c.dy}px)` : 'translate(0,0)', transition: 'opacity 0.4s ease-out, filter 0.4s ease-out, transform 0.4s ease-out' }}>
-                        {c.char}
-                      </span>
-                    )
+                    : <span key={c.id} style={{ display: 'inline-block', whiteSpace: c.char === ' ' ? 'pre' : 'normal', opacity: c.vanish ? 0 : 1, filter: c.vanish ? 'blur(4px)' : 'blur(0)', transform: c.vanish ? `translate(${c.dx}px,${c.dy}px)` : 'translate(0,0)', transition: 'opacity 0.4s ease-out, filter 0.4s ease-out, transform 0.4s ease-out' }}>{c.char}</span>
                 )}
               </div>
             </div>
@@ -595,7 +517,6 @@ function AppInner() {
       </AnimatePresence>
 
       <div style={{ background: '#fef3c7', border: '5px solid #1a1a2e', borderRadius: 14, overflow: 'hidden', boxShadow: '8px 8px 0 #1a1a2e' }}>
-
         {/* HEADER */}
         <div style={{ background: '#dc2626', borderBottom: '5px solid #1a1a2e', padding: '14px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 5px 0 #7f1d1d' }}>
           <div>
@@ -642,6 +563,7 @@ function AppInner() {
               purchases={purchases}
               onRefreshPurchases={refreshPurchases}
               onNeedLogin={() => setShowAuthModal(true)}
+              onOpenLegal={(page) => setLegalPage(page)}
             />
           </div>
         )}
@@ -659,7 +581,6 @@ function AppInner() {
         {/* BIN TAB */}
         {mainTab === 'bin' && (
           <>
-            {/* DAILY BANNER */}
             <div style={{ background: dailyDone ? '#065f46' : '#15803d', borderBottom: '3px solid #1a1a2e', padding: '5px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: '#bbf7d0', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
                 {dailyDone ? t.daily_done : t.daily_ready}
@@ -669,18 +590,15 @@ function AppInner() {
               </span>
             </div>
 
-            {/* TABS */}
             <div style={{ background: '#1d4ed8', borderBottom: '4px solid #1a1a2e', padding: '8px 14px', display: 'flex', gap: 7, alignItems: 'center' }}>
               {['type','draw','voice'].map(tabId => (
                 <TabBtn key={tabId} label={tabId === 'type' ? 'TYPE' : tabId === 'draw' ? 'DRAW' : 'VOICE'} active={tab===tabId} onClick={() => { setTab(tabId); hasDrawn.current=false; }} />
               ))}
             </div>
 
-            {/* SURFACE */}
             <div style={{ margin: '14px 14px 8px', background: '#fff', border: '4px solid #1a1a2e', borderRadius: 8, position: 'relative', overflow: 'hidden', minHeight: 200, boxShadow: '5px 5px 0 #1a1a2e', display: 'flex', flexDirection: 'column' }}>
               <span style={{ position: 'absolute', top: 5, left: 8, fontSize: 8, fontWeight: 700, color: '#dc2626', letterSpacing: 1, opacity: .3, textTransform: 'uppercase' }}>SECRET FEELINGS PANEL</span>
               <span style={{ position: 'absolute', bottom: 5, right: 8, fontSize: 8, fontWeight: 700, color: '#dc2626', letterSpacing: 1, opacity: .3, textTransform: 'uppercase' }}>NO.1 IN DISPOSAL</span>
-
               <AnimatePresence mode="wait">
                 {phase !== 'done' ? (
                   <motion.div key={`surface-${tab}-${phase}`} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
@@ -707,7 +625,6 @@ function AppInner() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
               <AnimatePresence>
                 {phase === 'animating' && fx === 'shh' && (
                   <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -723,7 +640,6 @@ function AppInner() {
               </AnimatePresence>
             </div>
 
-            {/* EFFECT SELECTOR */}
             <div style={{ padding: '0 14px 8px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {EFFECTS.map(e => (
                 <button key={e.id} title={e.desc} onClick={() => e.free && setFx(e.id)} style={{
@@ -739,7 +655,6 @@ function AppInner() {
               ))}
             </div>
 
-            {/* DISPOSE BUTTON */}
             <div style={{ padding: '8px 14px 16px', display: 'flex', justifyContent: 'center' }}>
               <motion.button
                 whileHover={canDispose ? { x: -2, y: -2 } : {}}
@@ -770,19 +685,22 @@ function AppInner() {
           </a>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, color: '#93c5fd' }}>{t.footer_left}</span>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <button onClick={() => setLegalPage('terms')} style={{ fontSize: 9, color: '#93c5fd', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, letterSpacing: 1 }}>{t.footer_terms}</button>
               <button onClick={() => setLegalPage('privacy')} style={{ fontSize: 9, color: '#93c5fd', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, letterSpacing: 1 }}>{t.footer_privacy}</button>
+              <button onClick={() => setLegalPage('refund')} style={{ fontSize: 9, color: '#93c5fd', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, letterSpacing: 1 }}>{t.footer_refund}</button>
+              <a href="https://line.me/R/ti/p/@tangjaicraft" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: '#93c5fd', textDecoration: 'none', fontWeight: 700, letterSpacing: 1 }}>{t.footer_contact}</a>
             </div>
           </div>
         </div>
       </div>
 
-      <AnimatePresence>
-        {legalPage && <LegalPage page={legalPage} onClose={() => setLegalPage(null)} />}
-      </AnimatePresence>
     </div>
     </ErrorBoundary>
+    <AnimatePresence>
+      {legalPage && <LegalPage page={legalPage} onClose={() => setLegalPage(null)} />}
+    </AnimatePresence>
+    </>
   );
 }
 
@@ -794,7 +712,6 @@ export default function App() {
   );
 }
 
-// ── SUB-COMPONENTS ──
 function StatBubble({ n, label, bg }) {
   return (
     <div style={{ background: bg, border: '3px solid #1a1a2e', borderRadius: '50%', width: 54, height: 54, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '3px 3px 0 #1a1a2e', flexShrink: 0 }}>

@@ -20,7 +20,26 @@ const CONTENT = {
 เราขอสงวนสิทธิ์ในการระงับบัญชีที่ละเมิดเงื่อนไขการใช้งาน
 
 **5. ติดต่อ**
-หากมีคำถามเกี่ยวกับเงื่อนไขการใช้งาน กรุณาติดต่อเราผ่าน Line Official
+หากมีคำถามเกี่ยวกับเงื่อนไขการใช้งาน กรุณาติดต่อเราผ่าน LINE Official @tangjaicraft
+    `,
+    refund_title: 'นโยบายการคืนเงิน',
+    refund: `
+**ภาพรวม**
+The Bin จำหน่ายดิจิทัลคอนเทนต์และไอเทมตกแต่ง (สกินและเอฟเฟกต์พิเศษ) ที่ปลดล็อกการใช้งานทันทีหลังชำระเงิน
+
+**สินค้าที่ไม่สามารถคืนเงินได้**
+- เมื่อดิจิทัลคอนเทนต์หรือสกินถูกส่งมอบ/ปลดล็อกเรียบร้อยแล้ว การซื้อนั้นถือเป็นที่สิ้นสุดและไม่สามารถขอคืนเงินได้
+- เนื่องจากเป็นสินค้าดิจิทัลที่ใช้งานได้ทันที จึงไม่มีการคืนสินค้า
+
+**กรณีชำระเงินสำเร็จแต่ยังไม่ได้รับสิทธิ์**
+- หากการชำระเงินสำเร็จแต่คอนเทนต์ไม่ถูกปลดล็อก กรุณาติดต่อฝ่ายสนับสนุนเพื่อตรวจสอบและแก้ไข
+- เราจะตรวจสอบรายการและปลดล็อกให้ หรือคืนเงินหากไม่สามารถส่งมอบสินค้าได้
+
+**ระยะเวลาในการติดต่อ**
+กรุณาติดต่อเราภายใน 7 วันหลังการชำระเงิน พร้อมแจ้งเบอร์โทรที่ใช้ login และรายการที่ซื้อ
+
+**ช่องทางติดต่อ**
+LINE Official @tangjaicraft — เราจะตอบกลับโดยเร็วที่สุด
     `,
     privacy_title: 'นโยบายความเป็นส่วนตัว',
     privacy: `
@@ -64,7 +83,26 @@ By using The Bin ("App"), you agree to these terms in full.
 We reserve the right to suspend accounts that violate these terms.
 
 **5. Contact**
-For questions about these terms, please contact us via our Line Official account.
+For questions about these terms, please contact us via our LINE Official account @tangjaicraft.
+    `,
+    refund_title: 'Refund Policy',
+    refund: `
+**Overview**
+The Bin sells digital content and cosmetic unlocks (skins and special effects) that are activated immediately after a successful payment.
+
+**Non-Refundable Purchases**
+- Once digital content or a skin has been successfully delivered/unlocked, the purchase is final and non-refundable.
+- Because these are instantly usable digital goods, no returns are possible.
+
+**Payment Succeeded but Content Not Unlocked**
+- If your payment succeeds but the content is not unlocked, please contact support so we can verify and resolve it.
+- We will review the transaction and unlock your item, or issue a refund if delivery cannot be completed.
+
+**Time Limit**
+Please contact us within 7 days of payment, including the phone number used to log in and the item purchased.
+
+**Contact**
+LINE Official @tangjaicraft — we will respond as soon as possible.
     `,
     privacy_title: 'Privacy Policy',
     privacy: `
@@ -108,7 +146,10 @@ function renderMarkdown(text) {
 export default function LegalPage({ page, onClose }) {
   const { lang } = useLang();
   const c = CONTENT[lang];
-  const isTerms = page === 'terms';
+  const titleMap = { terms: c.terms_title, refund: c.refund_title, privacy: c.privacy_title };
+  const bodyMap = { terms: c.terms, refund: c.refund, privacy: c.privacy };
+  const title = titleMap[page] || c.terms_title;
+  const body = bodyMap[page] || c.terms;
 
   return (
     <motion.div
@@ -140,7 +181,7 @@ export default function LegalPage({ page, onClose }) {
           borderRadius: '10px 10px 0 0',
         }}>
           <div style={{ fontFamily: "'Bangers',cursive", fontSize: 18, color: '#fef3c7', letterSpacing: 2 }}>
-            {isTerms ? c.terms_title : c.privacy_title}
+            {title}
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: 'none', color: '#fef3c7',
@@ -150,7 +191,7 @@ export default function LegalPage({ page, onClose }) {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px 24px' }}>
-          {renderMarkdown(isTerms ? c.terms : c.privacy)}
+          {renderMarkdown(body)}
         </div>
       </motion.div>
     </motion.div>

@@ -8,13 +8,13 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimesta
 // วิธีหา: Firebase Console → Project Settings → Your apps → SDK setup
 // ─────────────────────────────────────────────
 const firebaseConfig = {
-  apiKey:            "AIzaSyD8SrIkMayRqnur4p9-2Suwl5zHekxH2bo",
-  authDomain:        "the-bin-8fa05.firebaseapp.com",
-  projectId:         "the-bin-8fa05",
-  storageBucket:     "the-bin-8fa05.firebasestorage.app",
-  messagingSenderId: "593712631037",
-  appId:             "1:593712631037:web:c1a67a96cd50a4ff1b0294",
-  measurementId:     "G-KG8NE78YFP",
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app  = initializeApp(firebaseConfig);
